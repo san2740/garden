@@ -12,3 +12,7 @@
 ## 아이폰
 
 Safari에서 Pages 주소를 열고 **카메라 AR 시작**를 누르세요. Apple AR Quick Look에서 AR 모드로 전환해 건물을 배치합니다. USDZ 모델은 미터 단위이며 크기 조절을 잠갔습니다. iPhone 실기기에서 실물 크기와 실내 진입 시 표시를 확인해야 합니다. 카카오톡이나 ChatGPT 앱 안의 브라우저를 사용 중이면 Safari에서 주소를 여세요.
+
+
+## 실험적 문 인터랙션
+Android WebXR에서 hand-tracking 기능을 선택적으로 요청합니다. 브라우저가 XRHand 관절 데이터를 제공할 때만 손잡이 부근 집기/당기기가 작동합니다. 일반 스마트폰 Chrome에서는 지원되지 않을 수 있습니다. 대체 조작은 AR 화면의 문 열기/닫기 버튼입니다. 문은 GLB에 영구 저장되지 않고 Android 뷰어가 실행 중에 생성합니다. iPhone Quick Look USDZ에는 아직 반영되지 않습니다.
