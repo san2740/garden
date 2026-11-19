@@ -1,0 +1,1 @@
+GitHub Pages HTTPS 배포 후 /hand-door-iphone.html 접속. 카메라 및 손 인식 시작. 손가락 집기로 손잡이 조작 실험. 이 페이지는 공간 고정 AR이 아닌 카메라 배경의 3D 뷰어입니다. 네트워크 연결 필요.
