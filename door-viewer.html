@@ -1,0 +1,28 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>현관문 조작 테스트</title>
+<style>body{margin:0;background:#161a21;color:white;font-family:-apple-system,system-ui}#scene{position:fixed;inset:0}#ui{position:fixed;bottom:env(safe-area-inset-bottom);left:0;right:0;padding:18px;background:linear-gradient(transparent,#10141c 25%);text-align:center}button{background:#fff;color:#111;border:0;border-radius:13px;padding:14px 23px;font-weight:700;font-size:16px;margin:4px}p{font-size:13px;color:#d2d5dc}#status{position:fixed;top:15px;left:15px;font-size:13px;background:#0008;padding:10px;border-radius:8px}</style></head><body><div id="scene"></div><div id="status">모델 로딩 중...</div><div id="ui"><button id="open">문 열기</button><button id="close">문 닫기</button><p>문손잡이를 터치한 뒤 좌우로 드래그해 보세요.<br>손 인식이 아닌 터치 조작 테스트입니다.</p></div>
+<script type="module">
+import * as THREE from 'https://esm.sh/three@0.164.1';
+import {GLTFLoader} from 'https://esm.sh/three@0.164.1/examples/jsm/loaders/GLTFLoader.js';
+import {OrbitControls} from 'https://esm.sh/three@0.164.1/examples/jsm/controls/OrbitControls.js';
+const host=document.getElementById('scene'),status=document.getElementById('status');
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);host.appendChild(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color('#b9c9d7');scene.add(new THREE.HemisphereLight(0xffffff,0x778899,2));
+const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(5,10,8);scene.add(sun);
+const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.05,100);camera.position.set(4,2.8,8.5);
+const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,1.3,0);orbit.enableDamping=true;orbit.update();
+let door=null,goal=0,dragging=false,startX=0,startAngle=0;
+new GLTFLoader().load('./pavilion-animated-door.glb',g=>{
+ scene.add(g.scene);door=g.scene.getObjectByName('EntranceDoor_Hinge');
+ status.textContent=door?'모델 로딩 완료 · 문손잡이를 터치하세요':'문 회전축을 찾지 못했습니다';
+},undefined,e=>{status.textContent='GLB 로딩 실패: 서버에서 파일을 열어주세요';console.error(e)});
+document.getElementById('open').onclick=()=>goal=-Math.PI*95/180;
+document.getElementById('close').onclick=()=>goal=0;
+const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();
+function hitDoor(e){if(!door)return false;const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);return ray.intersectObjects(door.children,true).length>0}
+renderer.domElement.addEventListener('pointerdown',e=>{if(hitDoor(e)){dragging=true;startX=e.clientX;startAngle=goal;orbit.enabled=false;renderer.domElement.setPointerCapture(e.pointerId);status.textContent='손잡이 잡음 · 좌우로 움직이세요'}});
+renderer.domElement.addEventListener('pointermove',e=>{if(dragging){goal=THREE.MathUtils.clamp(startAngle-(e.clientX-startX)/Math.max(innerWidth,300)*2.5,-Math.PI*95/180,0)}});
+function release(){dragging=false;orbit.enabled=true;if(door)status.textContent='문 각도 '+Math.round(-goal*180/Math.PI)+'°'}
+renderer.domElement.addEventListener('pointerup',release);renderer.domElement.addEventListener('pointercancel',release);
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+function frame(){requestAnimationFrame(frame);if(door)door.rotation.y+=(goal-door.rotation.y)*.16;orbit.update();renderer.render(scene,camera)}frame();
+</script></body></html>
