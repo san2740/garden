@@ -1,25 +1,14 @@
 <!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>정원 파빌리온 · 현장 AR</title>
-  <script type="module" crossorigin src="./device.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="stylesheet" crossorigin href="./assets/ar-D0ygx5TL.css">
-</head>
-<body>
-  <main id="setup">
-    <h1>정원 파빌리온 AR</h1>
-    <p>휴대폰 카메라로 평평한 바닥을 비추고, 표시가 나타나면 화면을 탭해 가상 현관을 놓으세요. 그다음 휴대폰을 들고 직접 걸어 들어가세요.</p>
-    <p>건물은 실물 크기(14 × 10m)로 표시됩니다. 장애물이 없는 넓은 평지에서 사용하고, 걸을 때는 실제 주변을 확인하세요.</p>
-    <a id="apple-ar" rel="ar" href="./pavilion.usdz#allowsContentScaling=0" hidden><img src="./ar-button.png" alt=""></a>
-    <button id="start" type="button" disabled>카메라 AR 시작</button>
-    <p id="status" role="status">기기 지원 여부 확인 중…</p>
-  </main>
-  <div id="overlay" hidden>
-    <p id="guide" role="status"></p>
-    <button id="end" type="button">AR 종료</button>
-  </div>
-</body>
-</html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>건물 AR · 사람 합성 시험</title>
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
+</head><body>
+<canvas id="camera"></canvas>
+<section id="panel"><h1>건물 AR</h1><p>바닥을 인식한 뒤 현관을 놓을 곳을 터치하세요.</p>
+<p>사람의 발이 보이는 평지에서 한 명으로 시험하세요. 발 위치로 거리를 추정하므로 앞뒤 관계에는 오차가 있습니다.</p>
+<button id="start" disabled>준비 중…</button><button id="reset" hidden>다시 배치</button>
+<label><input id="people" type="checkbox" checked> 사람 합성</label>
+<p id="status" role="status">AR과 사람 인식 모델을 불러오는 중…</p></section>
+<script type="module" src="./app.js"></script>
+</body></html>
