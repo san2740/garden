@@ -1,6 +1,6 @@
-시작 주소: index.html 하나만 사용
-아이폰 기존 AR: 문이 포함된 pavilion.usdz 사용, 문은 닫힌 상태로 고정
-아이폰 손으로 문 열기(실험): index.html에서 두 번째 버튼 선택, 카메라+GLB 2D 근사 손 추적, AR 공간 고정 아님
-Android: 기존 WebXR AR 유지, GLB에는 문이 보이나 Android AR에서 손으로 문 조작 기능은 아직 없음
-HTTPS에서 카메라 권한 필요, 외부 Three.js/MediaPipe CDN 네트워크 필요
-GitHub Pages에는 garden-pavilion 폴더 안 파일을 사이트 루트에 업로드하세요.
+시작점은 index.html 하나입니다.
+기존 AR 시작: iPhone Quick Look / pavilion.usdz (닫힌 문, 손 조작 불가)
+후면 카메라로 문 잡기: MediaPipe 손가락 추적 + GLB 문 회전. 후면 카메라 영상 위에 모델 표시, 실제 공간 고정 AR 아님.
+손잡이 위치는 GLB에서 화면에 투영하여 근사 판정합니다. 손의 실제 3D 깊이나 물리 접촉을 인식하지 않습니다.
+GitHub Pages HTTPS에서 실행. 외부 라이브러리 CDN 연결 필요. Safari 기기 실측 검증 미완료.
+ZIP의 garden-pavilion 폴더 안 파일 전체를 사이트 루트에 덮어쓰기.

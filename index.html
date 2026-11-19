@@ -1,16 +1,16 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>정원 파빌리온</title><style>
-*{box-sizing:border-box}body{margin:0;background:#10151b;color:#fff;font-family:-apple-system,BlinkMacSystemFont,system-ui}#setup{padding:24px;max-width:540px;margin:8vh auto}h1{font-size:26px}p{line-height:1.6;color:#cbd5e1}button{border:0;border-radius:12px;padding:15px 18px;font-weight:700;font-size:16px;cursor:pointer}#start{background:#fff;color:#111}#handStart{background:#73e2b4;color:#102319}button:disabled{opacity:.5}#stage{position:fixed;inset:0;display:none;overflow:hidden}#camera{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}#viewport{position:absolute;inset:0;touch-action:none}#hud{position:absolute;top:env(safe-area-inset-top);left:12px;right:12px;pointer-events:none;background:#0009;padding:10px;border-radius:9px;font-size:13px}#controls{position:absolute;bottom:calc(12px + env(safe-area-inset-bottom));left:0;right:0;display:flex;justify-content:center;gap:8px}#controls button{padding:12px;font-size:14px}#dot{position:absolute;width:20px;height:20px;border:3px solid #8affb6;border-radius:50%;pointer-events:none;display:none;transform:translate(-50%,-50%)}#end{background:#edb4b4}</style></head><body>
-<main id="setup"><h1>정원 파빌리온 AR</h1><p>기존 아이폰 AR에서는 건물을 배치해 볼 수 있습니다. 손으로 문을 잡는 기능은 별도 카메라 실험 모드에서 테스트합니다.</p><button id="start">기존 AR 시작</button> <button id="handStart">손으로 문 열기 (실험)</button><p id="status">준비 완료</p><p style="font-size:13px">손 조작 모드는 실제 공간에 건물을 고정하는 AR이 아닙니다. 카메라 화면 위에 건물을 표시합니다.</p></main>
-<a id="apple-ar" rel="ar" href="./pavilion.usdz?v=door-v4#allowsContentScaling=0" hidden><img src="./ar-button.png" alt="AR"></a>
+*{box-sizing:border-box}body{margin:0;background:#10151b;color:#fff;font-family:-apple-system,BlinkMacSystemFont,system-ui}#setup{padding:24px;max-width:540px;margin:8vh auto}h1{font-size:26px}p{line-height:1.6;color:#cbd5e1}button{border:0;border-radius:12px;padding:15px 18px;font-weight:700;font-size:16px;cursor:pointer}#start{background:#fff;color:#111}#handStart{background:#73e2b4;color:#102319}button:disabled{opacity:.5}#stage{position:fixed;inset:0;display:none;overflow:hidden}#camera{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:none}#viewport{position:absolute;inset:0;touch-action:none}#hud{position:absolute;top:env(safe-area-inset-top);left:12px;right:12px;pointer-events:none;background:#0009;padding:10px;border-radius:9px;font-size:13px}#controls{position:absolute;bottom:calc(12px + env(safe-area-inset-bottom));left:0;right:0;display:flex;justify-content:center;gap:8px}#controls button{padding:12px;font-size:14px}#dot{position:absolute;width:20px;height:20px;border:3px solid #8affb6;border-radius:50%;pointer-events:none;display:none;transform:translate(-50%,-50%)}#end{background:#edb4b4}</style></head><body>
+<main id="setup"><h1>정원 파빌리온 AR</h1><p>아이폰 AR 배치와 후면 카메라 손동작 조작을 이 시작 화면에서 선택할 수 있습니다.</p><button id="start">기존 AR 시작</button> <button id="handStart">후면 카메라로 문 잡기</button><p id="status">준비 완료</p><p style="font-size:13px">손 조작은 후면 카메라 영상 위의 3D 모델을 움직이는 방식입니다. iPhone Quick Look의 공간 고정 AR과 동시에 실행되지는 않습니다.</p></main>
+<a id="apple-ar" rel="ar" href="./pavilion.usdz?v=rear-hand-v1#allowsContentScaling=0" hidden><img src="./ar-button.png" alt="AR"></a>
 <div id="stage"><video id="camera" autoplay muted playsinline></video><div id="viewport"></div><div id="dot"></div><div id="hud">손 추적 준비 중...</div><div id="controls"><button id="open">문 열기</button><button id="close">문 닫기</button><button id="end">종료</button></div></div>
 <script type="module">
 const $=id=>document.getElementById(id),isApple=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-$('start').onclick=()=>{if(isApple)$('apple-ar').click();else import('./assets/ar-Mqz0T2dt.js?v=door-v4').catch(e=>$('status').textContent='Android AR 로딩 실패: '+e.message)};
+$('start').onclick=()=>{if(isApple)$('apple-ar').click();else import('./assets/ar-Mqz0T2dt.js?v=rear-hand-v1').catch(e=>$('status').textContent='Android AR 로딩 실패: '+e.message)};
 let stream,renderer,scene,camera,door,handTracker,video=$('camera'),running=false,goal=0,grabbing=false,prevX=0,THREE,orbit;
 $('handStart').onclick=async()=>{
  $('status').textContent='카메라를 요청하는 중...';
  try{
- stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:640},height:{ideal:480}},audio:false});
  video.srcObject=stream;await video.play();
  $('setup').style.display='none';$('stage').style.display='block';running=true;
  THREE=await import('https://esm.sh/three@0.164.1');
@@ -20,14 +20,14 @@ $('handStart').onclick=async()=>{
  scene=new THREE.Scene();scene.add(new THREE.HemisphereLight(0xffffff,0x555555,2.5));const light=new THREE.DirectionalLight(0xffffff,2);light.position.set(4,8,6);scene.add(light);
  camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,100);camera.position.set(3.2,2.3,8);
  orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,1.3,0);orbit.enableDamping=true;orbit.update();
- await new Promise((resolve,reject)=>new GLTFLoader().load('./pavilion.glb?v=door-v4',g=>{scene.add(g.scene);door=g.scene.getObjectByName('EntranceDoor_Hinge');door?resolve():reject(new Error('문 회전축 없음'))},undefined,reject));
+ await new Promise((resolve,reject)=>new GLTFLoader().load('./pavilion.glb?v=rear-hand-v1',g=>{scene.add(g.scene);door=g.scene.getObjectByName('EntranceDoor_Hinge');door?resolve():reject(new Error('문 회전축 없음'))},undefined,reject));
  $('hud').textContent='문 표시 완료 · 손 인식 초기화 중';
  animate();
  try{
  const mp=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm');
  const vision=await mp.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm');
  handTracker=await mp.HandLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',delegate:'GPU'},runningMode:'VIDEO',numHands:1});
- $('hud').textContent='손을 카메라에 보여주세요. 손잡이 근처에서 엄지·검지를 집고 좌우로 움직이세요.';
+ $('hud').textContent='후면 카메라에 손을 보여주세요. 화면의 문손잡이 부근에서 집고 좌우로 움직이세요.';
  track();
  }catch(e){$('hud').textContent='손 추적 불가: '+e.message+' · 터치 버튼으로 문을 시험하세요.';console.error(e)}
  }catch(e){$('status').textContent='시작 실패: '+e.message;stop();console.error(e)}
@@ -42,18 +42,27 @@ function track(){
  const hand=result.landmarks?.[0],dot=$('dot');
  if(hand){
  const thumb=hand[4],index=hand[8],palm=hand[0];
- const x=1-(thumb.x+index.x)/2,y=(thumb.y+index.y)/2;
+ const x=(thumb.x+index.x)/2,y=(thumb.y+index.y)/2;
  dot.style.display='block';dot.style.left=(x*100)+'%';dot.style.top=(y*100)+'%';
  const pinch=Math.hypot(thumb.x-index.x,thumb.y-index.y)<.065;
  // The on-screen hand is 2D; approximate handle zone only, not real 3D contact.
- const handleZone=x>.30&&x<.75&&y>.20&&y<.82;
+ // Project the real GLB handle to screen, rather than using a generic center zone.
+ const handle=scene.getObjectByName('EntranceDoor_Handle');
+ let handleZone=false;
+ if(handle){
+   handle.updateWorldMatrix(true,false);
+   const point=handle.getWorldPosition(new THREE.Vector3()).project(camera);
+   const sx=(point.x+1)/2, sy=(1-point.y)/2;
+   // Video uses object-fit:cover; this is an approximate 2D alignment, not depth tracking.
+   handleZone=Math.hypot(x-sx,y-sy)<.16;
+ }
  if(pinch&&(grabbing||handleZone)){
  if(!grabbing){grabbing=true;prevX=x}
  else {goal=THREE.MathUtils.clamp(goal+(x-prevX)*2.5,-Math.PI*95/180,0);prevX=x}
  $('hud').textContent='🤏 잡는 중 · 문 각도 '+Math.round(-goal*180/Math.PI)+'° (2D 근사 조작)';
- }else{grabbing=false;$('hud').textContent=pinch?'손을 화면 중앙의 손잡이 쪽으로 이동하세요':'엄지와 검지를 모아 잡아보세요'}
+ }else{grabbing=false;$('hud').textContent=pinch?'화면에 보이는 문손잡이 쪽으로 손을 이동하세요':'엄지와 검지를 모아 잡아보세요'}
  dot.style.borderColor=grabbing?'#ffda75':'#8affb6';
- }else{grabbing=false;dot.style.display='none';$('hud').textContent='손을 카메라에 보여주세요'}
+ }else{grabbing=false;dot.style.display='none';$('hud').textContent='후면 카메라에 손을 보여주세요'}
  }}catch(e){$('hud').textContent='손 추적 오류: '+e.message;return}
  requestAnimationFrame(track);
 }
