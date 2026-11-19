@@ -19,3 +19,6 @@ JavaScript 문법, 정적 파일 연결, 모델 파싱, 바닥 교점 및 투영
 - 8th Wall Engine Binary는 Niantic Spatial의 바이너리 라이선스를 따릅니다. 원본 패키지를 vendor/xr에 포함했습니다. vendor/xr/LICENSE를 확인하세요.
 - Three.js 라이선스는 vendor/three/LICENSE에 있습니다.
 - MediaPipe Tasks 및 Selfie Segmenter는 Google의 배포물입니다. https://ai.google.dev/edge/mediapipe/solutions/vision/image_segmenter 를 참고하세요. 배포물과 모델은 원본을 사용합니다.
+
+## 화면 크기 수정
+카메라 캔버스의 실제 픽셀 크기를 Safari의 visualViewport 크기로 초기화하고 주소창 높이 변경 및 회전 시 갱신합니다. AR 시작 후 안내 패널을 축소합니다. 위치 추적 상태는 매 프레임 확인하며 정상 복구 시 배치 안내를 다시 표시합니다. 기본 300×150 캔버스에서 세로·가로 화면으로 변경하는 로직을 검사했습니다. 실제 iPhone 화면에서의 결과는 추가 확인이 필요합니다.

@@ -1,3 +1,4 @@
+import {fitCameraCanvas} from './viewport.js';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {FilesetResolver, ImageSegmenter} from './vendor/vision/vision_bundle.mjs';
@@ -34,7 +35,19 @@ let building, segmenter, xrScene, floorY, placed = false, lastSample = 0, tracki
 const ray = new THREE.Raycaster();
 const ground = new THREE.Plane(new THREE.Vector3(0,1,0),0);
 
+function resizeCamera() { fitCameraCanvas(canvas, xrScene?.renderer); }
+window.addEventListener('resize', resizeCamera);
+window.visualViewport?.addEventListener('resize', resizeCamera);
+resizeCamera();
+
 function say(text) { if (status.textContent !== text) status.textContent = text; }
+
+function updateTracking(state) {
+  const previous = tracking;
+  tracking = state === 'NORMAL';
+  if (!tracking) { person.visible=false; say('위치 인식 중 · 바닥 무늬가 보이도록 천천히 움직여 주세요.'); return; }
+  if (!previous) say(placed ? '위치 추적이 복구되었습니다.' : '바닥을 터치해 현관을 배치하세요.');
+}
 
 function loadEngine() {
   return new Promise((resolve,reject) => {
@@ -144,6 +157,7 @@ start.onclick=async () => {
       const permission=await DeviceMotionEvent.requestPermission();
       if (permission !== 'granted') throw new Error('움직임 센서 접근을 허용해야 합니다.');
     }
+    resizeCamera();
     XR8.XrController.configure({scale:'absolute',disableWorldTracking:false});
     XR8.Threejs.configure({renderCameraTexture:true});
     XR8.addCameraPipelineModules([
@@ -152,21 +166,28 @@ start.onclick=async () => {
         name:'pavilion-person',
         onStart:() => {
           xrScene=XR8.Threejs.xrScene();
+          resizeCamera();
+          document.body.classList.add('running');
           xrScene.scene.add(building,new THREE.HemisphereLight(0xffffff,0x9c8f79,2));
           const light=new THREE.DirectionalLight(0xffffff,2);
           light.position.set(3,8,2); xrScene.scene.add(light);
           xrScene.camera.add(person); xrScene.scene.add(xrScene.camera);
-          tracking=true;
+          tracking=false;
           start.hidden=true;
           say('주변 바닥을 천천히 비추고 현관 위치를 터치하세요.');
         },
-        onUpdate:() => { try { samplePerson(performance.now()); } catch(error) { person.visible=false; people.checked=false; say('사람 합성 오류 · '+error.message); console.error(error); } },
+        onUpdate:({processCpuResult}) => {
+          resizeCamera();
+          const reality = processCpuResult?.reality;
+          if (reality) updateTracking(reality.trackingStatus);
+          try { samplePerson(performance.now()); }
+          catch(error) { person.visible=false; people.checked=false; say('사람 합성 오류 · '+error.message); console.error(error); }
+        },
         onException:error => say('AR 오류 · '+(error.message??String(error))),
         onPaused:() => { tracking=false; person.visible=false; },
-        onResume:() => { tracking=true; },
+        onResume:() => { tracking=false; resizeCamera(); },
         listeners:[{event:'reality.trackingstatus',process:event => {
-          tracking=event.detail.status==='NORMAL';
-          if (!tracking) { person.visible=false; say('위치 추적 중 · 주변을 천천히 비춰 주세요.'); }
+          updateTracking(event.detail.status);
         }}]
       }
     ]);
