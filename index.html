@@ -1,14 +1,15 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>건물 AR · 사람 합성 시험</title>
-<link rel="stylesheet" href="./style.css?v=2">
+<link rel="stylesheet" href="./style.css?v=3">
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head><body>
 <canvas id="camera"></canvas>
 <section id="panel"><h1>건물 AR</h1><p class="intro">바닥을 인식한 뒤 현관을 놓을 곳을 터치하세요.</p>
 <p class="intro">사람의 발이 보이는 평지에서 한 명으로 시험하세요. 발 위치로 거리를 추정하므로 앞뒤 관계에는 오차가 있습니다.</p>
 <button id="start" disabled>준비 중…</button><button id="reset" hidden>다시 배치</button>
+<div id="placement"><label>바닥에서 휴대폰까지 높이 (m) <input id="camera-height" type="number" min="0.5" max="2.2" step="0.05" value="1.4"></label><button id="place-front">3m 앞에 배치</button></div>
 <label><input id="people" type="checkbox" checked> 사람 합성</label>
 <p id="status" role="status">AR과 사람 인식 모델을 불러오는 중…</p></section>
-<script type="module" src="./app.js?v=2"></script>
+<script type="module" src="./app.js?v=3"></script>
 </body></html>

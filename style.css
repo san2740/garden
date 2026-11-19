@@ -8,3 +8,7 @@ body.running #panel{top:max(8px,env(safe-area-inset-top));padding:10px 12px}
 body.running #panel .intro,body.running h1{display:none}
 body.running #panel label{margin-top:0}
 body.running #panel #status{margin-bottom:0}
+#placement{display:none}
+body.running #placement:not([hidden]){display:block;margin-bottom:8px}
+#camera-height{width:65px;font:inherit;padding:4px}
+#place-front{margin-top:6px}

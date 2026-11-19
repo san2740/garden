@@ -118,11 +118,25 @@ function samplePerson(now) {
 }
 
 function place(event) {
-  if (!xrScene || placed || !tracking) return;
-  const bounds=canvas.getBoundingClientRect();
-  const hits=XR8.XrController.hitTest((event.clientX-bounds.left)/bounds.width,(event.clientY-bounds.top)/bounds.height,['DETECTED_SURFACE']);
-  if (!hits.length) { say('바닥을 천천히 비춘 후 다시 터치하세요.'); return; }
-  const door=new THREE.Vector3().copy(hits[0].position);
+  if (!xrScene || placed) return;
+  if (!tracking) { say('위치 인식 중입니다. 주변을 천천히 비춰 주세요.'); return; }
+  const height = document.querySelector('#camera-height').valueAsNumber;
+  if (!Number.isFinite(height) || height<0.5 || height>2.2) { say('휴대폰 높이는 0.5~2.2m로 입력하세요.'); return; }
+  xrScene.camera.updateMatrixWorld(true);
+  const cameraPosition=xrScene.camera.getWorldPosition(new THREE.Vector3());
+  const door=new THREE.Vector3();
+  const groundHeight=cameraPosition.y-height;
+  if (event.currentTarget===canvas) {
+    const bounds=canvas.getBoundingClientRect();
+    ray.setFromCamera(new THREE.Vector2(2*(event.clientX-bounds.left)/bounds.width-1,1-2*(event.clientY-bounds.top)/bounds.height),xrScene.camera);
+    if (!ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-groundHeight),door)) { say('화면 아래쪽 바닥을 터치하거나 앞에 배치를 누르세요.'); return; }
+  } else {
+    xrScene.camera.getWorldDirection(door);
+    door.y=0;
+    if (door.lengthSq()<0.01) { say('휴대폰을 약간 들어 앞을 향하게 해 주세요.'); return; }
+    door.normalize().multiplyScalar(3).add(cameraPosition);
+    door.y=groundHeight;
+  }
   const outward=xrScene.camera.position.clone().sub(door);
   outward.y=0;
   if (outward.length()<0.6 || outward.length()>8) { say('2~4m 앞 바닥에 배치하세요.'); return; }
@@ -131,6 +145,7 @@ function place(event) {
   building.rotation.y=Math.atan2(outward.x,outward.z);
   building.visible=true; placed=true; floorY=door.y;
   reset.hidden=false;
+  document.querySelector('#placement').hidden=true;
   say('배치되었습니다. 사람 한 명의 발까지 비춰 시험하세요.');
 }
 
@@ -194,7 +209,8 @@ start.onclick=async () => {
     await XR8.run({canvas});
   } catch(error) { say(error.message); start.disabled=false; }
 };
-reset.onclick=() => { placed=false; building.visible=false; person.visible=false; say('바닥을 터치해 다시 배치하세요.'); };
+document.querySelector('#place-front').onclick=place;
+reset.onclick=() => { document.querySelector('#placement').hidden=false; placed=false; building.visible=false; person.visible=false; say('바닥을 터치해 다시 배치하세요.'); };
 people.onchange=() => { person.visible=false; };
 canvas.addEventListener('click',place);
 window.addEventListener('pagehide',() => { if (window.XR8) XR8.stop(); segmenter?.close(); });
